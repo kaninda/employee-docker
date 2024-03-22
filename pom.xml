@@ -11,7 +11,7 @@
     <groupId>com.aka</groupId>
     <artifactId>employee-docker</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <name>employee-docker</name>
     <description>Demo project for Spring Boot</description>
     <properties>
