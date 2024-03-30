@@ -1,0 +1,5 @@
+- name: install tomcat
+  hosts: ocean
+  become: yes
+  roles:
+    - tomcat_install

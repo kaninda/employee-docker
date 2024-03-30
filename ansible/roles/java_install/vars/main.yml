@@ -1,0 +1,6 @@
+---
+# vars file for java_install
+
+jdk_download_url: https://download.oracle.com/java/17/archive/jdk-17.0.9_linux-x64_bin.tar.gz
+jdk_download_location: /opt/jdk-17.0.9_linux-x64_bin.tar.gz
+java_home: /opt/jdk-17.0.9
