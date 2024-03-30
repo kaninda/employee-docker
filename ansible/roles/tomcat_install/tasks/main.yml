@@ -1,0 +1,86 @@
+
+# tasks file for tomcat_install
+- name: Update the System Packages
+  ansible.builtin.apt:
+    upgrade: yes
+    update_cache: yes
+
+- name: Create tomcat group
+  ansible.builtin.group:
+    name: tomcat
+    system: yes
+    state: present
+
+- name: Create tomcat user
+  ansible.builtin.user:
+    name: tomcat
+    group: tomcat
+    password: password
+    home: /opt/tomcat10
+    shell: "/bin/bash"
+
+- name: Create a Tomcat Directory
+  ansible.builtin.file:
+    path: /opt/tomcat10
+    owner: tomcat
+    group: tomcat
+    mode: 0755
+    recurse: yes
+
+- name: download & unarchive tomcat10
+  ansible.builtin.unarchive:
+    src: "{{tomcat_download_url}}"
+    dest: /opt/tomcat10
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+
+- name: Change owner & group of tomcat directory
+  ansible.builtin.file:
+    path: /opt/tomcat10
+    owner: tomcat
+    group: tomcat
+    recurse: yes
+
+- name: Create empty Tomcat service file /etc/systemd/system/tomcat.service
+  ansible.builtin.file:
+    path: /etc/systemd/system/tomcat.service
+    state: touch
+
+- name: Créer setenv.sh et ajouter JAVA_HOME
+  ansible.builtin.copy:
+    dest: "/opt/tomcat10/bin/setenv.sh"
+    content: |
+      #!/bin/bash
+      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    mode: '0755'
+    owner: tomcat
+    group: tomcat
+
+- name: Add tomcat service details in /etc/systemd/system/tomcat.service
+  ansible.builtin.blockinfile:
+    path: /etc/systemd/system/tomcat.service
+    block: |
+      [Unit]
+      Description=Tomcat 10
+      After=network.target
+      [Service]
+      Type=forking
+      User=tomcat
+      Group=tomcat
+      Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
+      Environment="JAVA_OPTS=-Djava.security.egd=file:///dev/urandom"
+      Environment="CATALINA_BASE=/opt/tomcat10"
+      Environment="CATALINA_HOME=/opt/tomcat10"
+      Environment="CATALINA_PID=/opt/tomcat10/temp/tomcat.pid"
+      Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+      ExecStart=/opt/tomcat10/bin/startup.sh
+      ExecStop=/opt/tomcat10/bin/shutdown.sh
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable the tomcat service and start
+  become: yes
+  ansible.builtin.systemd:
+    name: tomcat
+    enabled: yes
+    state: started
