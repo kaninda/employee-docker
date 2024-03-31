@@ -35,7 +35,6 @@
         <url>https://github.com/kaninda/employee-docker</url>
         <connection>scm:git:https://github.com/kaninda/employee-docker.git</connection>
         <developerConnection>scm:git:ssh://github.com/kaninda/employee-docker.git</developerConnection>
-      <tag> employee-docker-1.1.8</tag>
   </scm>
     <dependencies>
         <dependency>
