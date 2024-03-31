@@ -1,0 +1,71 @@
+- name: deploy app
+  hosts: ocean
+  become: yes
+  vars:
+    nexus_url: "http://128.199.15.15:8081/repository/maven-public/com/aka"
+    application_name: "employee-docker"
+    application_version: "1.1.0"
+    war_url: "notFound"
+  tasks:
+    - name: "Telecharger le fichier metadata"
+      ansible.builtin.get_url:
+        url: "{{ nexus_url }}/{{ application_name }}/maven-metadata.xml"
+        dest: "/tmp/maven-metadata.xml"
+
+    - name: "Extraire la dernière version de l'artefact avec xmllint"
+      command: xmllint --xpath "string(/metadata/versioning/latest)" /tmp/maven-metadata.xml
+      register: xmllint_output
+
+    #---------------------------------------------- RELEASE --------------------------------------------
+    - name: "Affichage de la derniere version du war"
+      debug:
+        msg: "La derniere version trouvée est {{ xmllint_output.stdout }}"
+
+    - name: "Definir la version du dernier artefact dans une variable"
+      set_fact:
+        version_artifact: "{{ xmllint_output.stdout }}"
+
+    - name: "Afficher l' url de la derniere version de la release"
+      set_fact:
+        war_url: "{{ nexus_url }}/{{ application_name }}/{{ version_artifact }}/ {{ application_name }}-{{ version_ artifact }}.war"
+      when: not version_artifact.endswith('-SNAPSHOT')
+ #--------------------------------------------------- SNAPSHOT-----------------------------------------#
+
+    - name: "Recuperation du fichier metadata de la snapshot"
+      ansible.builtin.get_url:
+        url: "{{ nexus_url }}/{{ application_name }}/{{ version_artifact }}/maven-metadata.xml"
+        dest: "/tmp/maven-metadata-snapshot.xml"
+      when:  version_artifact.endswith('-SNAPSHOT')
+
+    - name: "Extraire la dernière version du timestamp"
+      command: xmllint --xpath "string(/metadata/versioning/snapshotVersions/snapshotVersion[extension='war']/value)" /tmp/maven-metadata-snapshot.xml
+      register: timestamp_output
+      when: version_artifact.endswith('-SNAPSHOT')
+
+    - name: "Debugging timestamp"
+      debug:
+        msg: " DEBUG {{ timestamp_output.stdout }}"
+
+    - name: "Enregistrer la version de output"
+      set_fact:
+        timestamp: "{{ timestamp_output.stdout }}"
+      when: version_artifact.endswith('-SNAPSHOT')
+
+    - name: "Afficher l' url de la derniere version du snapshot"
+      set_fact:
+        war_url: "{{ nexus_url }}/{{ application_name }}/{{ version_artifact }}/{{ application_name }}-{{ timestamp }}.war"
+      when: version_artifact.endswith('-SNAPSHOT')
+
+    #-------------------------------------------- UrL final ----------------------
+
+    - name: "Affichage de l'url final"
+      debug:
+        msg: "URL final: {{ war_url }}"
+
+    #-------------------------------------------------------------------------------
+
+
+
+
+
+
