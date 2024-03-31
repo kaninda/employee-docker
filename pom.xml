@@ -10,7 +10,7 @@
 
     <groupId>com.aka</groupId>
     <artifactId>employee-docker</artifactId>
-    <version>1.1.10-SNAPSHOT</version>
+    <version>1.1.10</version>
     <packaging>war</packaging>
     <name>employee-docker</name>
     <description>Demo project for Spring Boot</description>
