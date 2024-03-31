@@ -27,7 +27,7 @@
 
     - name: "Afficher l' url de la derniere version de la release"
       set_fact:
-        war_url: "{{ nexus_url }}/{{ application_name }}/{{ version_artifact }}/ {{ application_name }}-{{ version_ artifact }}.war"
+        war_url: "{{ nexus_url }}/{{ application_name }}/{{ version_artifact }}/{{ application_name }}-{{ version_artifact }}.war"
       when: not version_artifact.endswith('-SNAPSHOT')
  #--------------------------------------------------- SNAPSHOT-----------------------------------------#
 
@@ -45,6 +45,7 @@
     - name: "Debugging timestamp"
       debug:
         msg: " DEBUG {{ timestamp_output.stdout }}"
+      when: version_artifact.endswith('-SNAPSHOT')
 
     - name: "Enregistrer la version de output"
       set_fact:
