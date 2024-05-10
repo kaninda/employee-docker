@@ -1,17 +1,17 @@
 package com.aka.service;
-
 import com.aka.model.Employee;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
+import java.util.Optional;
 
-@Service
-public class EmployeeService {
 
-    public List<Employee> getAllEmployees() {
-        return List.of(
-                new Employee("Arnaud", 1000)
-        );
-    }
+public interface EmployeeService {
+
+    List<Employee> findAll ();
+
+    Optional <Employee> findByName (String name);
+
+    Employee create (Employee employee);
+
+    Optional<Employee> findOne(Long id);
 
 }

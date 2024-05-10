@@ -1,15 +1,14 @@
 package com.aka.controller;
 
+import com.aka.controller.exception.EmployeeFoundException;
 import com.aka.model.Employee;
 import com.aka.service.EmployeeService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/employees")
+@RequestMapping("/api/employees")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -19,8 +18,22 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public List<Employee> getAllEmployees() {
-        return employeeService.getAllEmployees();
+    public List<Employee> findAll() {
+        return employeeService.findAll();
     }
 
+    @PostMapping
+    public Employee create (@RequestBody Employee employee){
+        return employeeService.create(employee);
+    }
+
+    @GetMapping("/{id}")
+    public Employee findOne (@PathVariable Long id){
+        return employeeService.findOne(id).orElseThrow(EmployeeFoundException::new);
+    }
+
+    @GetMapping("/name/{name}")
+    public Employee findByName(@PathVariable String name){
+        return employeeService.findByName(name).orElseThrow(() -> new EmployeeFoundException("Cannot find Employee with this name"));
+    }
 }
