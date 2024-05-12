@@ -14,9 +14,9 @@ docker run -it -ePORT:8080 -p8080:8080 employee:jdk .
 ```
 
 ## Ansible
-running ansible to deploy 
+running ansible to deploy local
 ```shell
-ansible-playbook -i ansible/inventories/hosts ansible/deploy.yml
+ ansible-playbook -i ansible/inventories/local ansible/deploy.yml --ask-become-pass
 ```
 
 

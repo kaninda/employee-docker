@@ -1,4 +1,4 @@
 ---
-# vars file for tomcat_install
+# aka.yml file for tomcat_install
 tomcat_download_url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.20/bin/apache-tomcat-10.1.20.tar.gz
 

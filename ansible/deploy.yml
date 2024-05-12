@@ -1,12 +1,6 @@
 - name: deploy app
-  hosts: ocean
+  hosts: aka
   become: yes
-  vars:
-    nexus_url: "http://128.199.15.15:8081/repository/maven-public/com/aka"
-    application_name: "employee-docker"
-    application_version: "1.1.0"
-    tomcat_webapps: "/opt/tomcat10/webapps"
-    war_url: "notFound"
   tasks:
     - name: "Telecharger le fichier metadata"
       ansible.builtin.get_url:
@@ -68,9 +62,10 @@
 
     - name: "Arret de Tomcat"
       become: true
-      systemd:
-        name: tomcat
-        state: stopped
+      command: "{{ tomcat_home }}/bin/shutdown.sh"
+      become_user: "{{ user_tomcat}}"
+      ignore_errors: yes
+
     #--------------------------------------------- Dowmload Artifact _______________
 
     - name: "Download artefact"
@@ -85,9 +80,8 @@
     #-------------------------------------- Start Tomcat service ----------------------
     - name: "Start Tomcat Service "
       become: yes
-      systemd:
-        name: tomcat
-        state: started
+      command: "{{ tomcat_home }}/bin/startup.sh"
+      become_user: "{{ user_tomcat}}"
 
 
 
