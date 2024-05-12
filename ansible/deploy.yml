@@ -1,7 +1,12 @@
 - name: deploy app
   hosts: aka
   become: yes
+  vars_files:
+    - "{{ var_files }}"
   tasks:
+    - name: "Debug operation"
+      debug:
+        msg: "La valeur {{ vault_employee_db_password }}"
     - name: "1.Telecharger le fichier metadata"
       ansible.builtin.get_url:
         url: "{{ nexus_url }}/{{ application_name }}/maven-metadata.xml"
@@ -76,6 +81,14 @@
         owner: "{{ user_tomcat }}"
         group: "{{ group_tomcat }}"
         mode: '0644'
+
+    #-----------------------------------------------Mettre a jour le mot de pass de la base ----------
+    - name: "14. Update database password"
+      become: yes
+      replace:
+        path: "/Users/arnaudkaninda/Work/Tools/apache-tomcat-10.1.19/webapps/employee-docker/WEB-INF/classes/application.yml"
+        regexp: 'password: .*\n'
+        replace: 'password: {{ vault_employee_db_password }}\n'
 
     #-------------------------------------- Start Tomcat service ----------------------
     - name: "Start Tomcat Service "
