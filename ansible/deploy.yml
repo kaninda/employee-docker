@@ -2,65 +2,65 @@
   hosts: aka
   become: yes
   tasks:
-    - name: "Telecharger le fichier metadata"
+    - name: "1.Telecharger le fichier metadata"
       ansible.builtin.get_url:
         url: "{{ nexus_url }}/{{ application_name }}/maven-metadata.xml"
         dest: "/tmp/maven-metadata.xml"
 
-    - name: "Extraire la dernière version de l'artefact avec xmllint"
+    - name: "2.Extraire la dernière version de l'artefact avec xmllint"
       command: xmllint --xpath "string(/metadata/versioning/latest)" /tmp/maven-metadata.xml
       register: xmllint_output
 
     #---------------------------------------------- RELEASE --------------------------------------------
-    - name: "Affichage de la derniere version du war"
+    - name: "3.Affichage de la derniere version du war"
       debug:
         msg: "La derniere version trouvée est {{ xmllint_output.stdout }}"
 
-    - name: "Definir la version du dernier artefact dans une variable"
+    - name: "4.Definir la version du dernier artefact dans une variable"
       set_fact:
         version_artifact: "{{ xmllint_output.stdout }}"
 
-    - name: "Afficher l' url de la derniere version de la release"
+    - name: "5.Afficher l' url de la derniere version de la release"
       set_fact:
         war_url: "{{ nexus_url }}/{{ application_name }}/{{ version_artifact }}/{{ application_name }}-{{ version_artifact }}.war"
       when: not version_artifact.endswith('-SNAPSHOT')
  #--------------------------------------------------- SNAPSHOT-----------------------------------------#
 
-    - name: "Recuperation du fichier metadata de la snapshot"
+    - name: "6.Recuperation du fichier metadata de la snapshot"
       ansible.builtin.get_url:
         url: "{{ nexus_url }}/{{ application_name }}/{{ version_artifact }}/maven-metadata.xml"
         dest: "/tmp/maven-metadata-snapshot.xml"
       when:  version_artifact.endswith('-SNAPSHOT')
 
-    - name: "Extraire la dernière version du timestamp"
+    - name: "7.Extraire la dernière version du timestamp"
       command: xmllint --xpath "string(/metadata/versioning/snapshotVersions/snapshotVersion[extension='war']/value)" /tmp/maven-metadata-snapshot.xml
       register: timestamp_output
       when: version_artifact.endswith('-SNAPSHOT')
 
-    - name: "Debugging timestamp"
+    - name: "8.Debugging timestamp"
       debug:
         msg: " DEBUG {{ timestamp_output.stdout }}"
       when: version_artifact.endswith('-SNAPSHOT')
 
-    - name: "Enregistrer la version de output"
+    - name: "9.Enregistrer la version de output"
       set_fact:
         timestamp: "{{ timestamp_output.stdout }}"
       when: version_artifact.endswith('-SNAPSHOT')
 
-    - name: "Afficher l' url de la derniere version du snapshot"
+    - name: "10.Afficher l' url de la derniere version du snapshot"
       set_fact:
         war_url: "{{ nexus_url }}/{{ application_name }}/{{ version_artifact }}/{{ application_name }}-{{ timestamp }}.war"
       when: version_artifact.endswith('-SNAPSHOT')
 
     #-------------------------------------------- UrL final ----------------------
 
-    - name: "Affichage de l'url final"
+    - name: "11.Affichage de l'url final"
       debug:
         msg: "URL final: {{ war_url }}"
 
     #------------------------------------------- Arret de tomcat -----------------------
 
-    - name: "Arret de Tomcat"
+    - name: "12.Arret de Tomcat"
       become: true
       command: "{{ tomcat_home }}/bin/shutdown.sh"
       become_user: "{{ user_tomcat}}"
@@ -68,13 +68,13 @@
 
     #--------------------------------------------- Dowmload Artifact _______________
 
-    - name: "Download artefact"
+    - name: "13.Download artefact"
       become: yes
       ansible.builtin.get_url:
         url: "{{ war_url }}"
         dest: "{{ tomcat_webapps }}/employee-docker.war"
-        owner: "tomcat"
-        group: "tomcat"
+        owner: "{{ user_tomcat }}"
+        group: "{{ group_tomcat }}"
         mode: '0644'
 
     #-------------------------------------- Start Tomcat service ----------------------
